@@ -5,13 +5,14 @@ import src.datosBarco as db
 def configurarPoblacion(toolbox):
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax)
-    toolbox.register("individual", crearIndividuo, rows=db.__tamano_compartimento__,
+    toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-def crearIndividuo(rows, cols, compartimentos):
+def crearIndividuo(ind, rows, cols, compartimentos):
     lista_contenedores = listaPorPeso()
-    ret = [-1 for i in range(0, rows * cols * compartimentos)]
+
+    barco = ind([-1 for i in range(0, rows * cols * compartimentos)])
 
     posiciones_validas = initPosicionesValidas(cols, compartimentos)
 
@@ -31,14 +32,14 @@ def crearIndividuo(rows, cols, compartimentos):
         contenedor = lista_contenedores[0]
         lista_contenedores.remove(contenedor)
 
-        ret[pos] = contenedor[1]
+        barco[pos] = contenedor[1]
 
         if posicion[0] < rows - 1:
             posiciones_validas[compartimento][posicion_][0] += 1
         else:
             posiciones_validas[compartimento].remove(posiciones_validas[compartimento][posicion_])
 
-    return ret
+    return barco
 
 def initPosicionesValidas(cols, compartimentos):
     posiciones_validas = []
