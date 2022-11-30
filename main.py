@@ -6,18 +6,17 @@ import matplotlib.pyplot as plt
 
 def main():
     toolbox = base.Toolbox()
-    leer.read_csv('datos/boat_test01.csv')
+    leer.read_csv('datos/boat_test06.csv')
 
     evol.configurarPoblacion(toolbox)
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
     
-    population = toolbox.population(n=50)
+    hof = tools.HallOfFame(5)
 
-    p = tools.selBest(population,1)[0]
-    print(strBarco(p))
+    population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=200, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=200, verbose=False, stats=stats, halloffame=hof)
 
     output(logbook, population)
     
@@ -37,9 +36,9 @@ def output(logbook, population):
     
     fig, ax1 = plt.subplots()
     
-    line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")    
+    # line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")    
     line2 = ax1.plot(gen, maxs, "g-", label="Max Fitness")
-    line3 = ax1.plot(gen, mins, "b-", label="Min Fitness")
+    # line3 = ax1.plot(gen, mins, "b-", label="Min Fitness")
     ax1.set_xlabel("Generation")
     ax1.set_ylabel("Fitness", color="b")
     
