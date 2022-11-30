@@ -1,6 +1,7 @@
 import random
 from deap import base, tools, algorithms, creator
 import src.datosBarco as db
+import numpy as np
 
 def configurarPoblacion(toolbox):
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -8,6 +9,129 @@ def configurarPoblacion(toolbox):
     toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+def configurarEvolucion(toolbox):
+    toolbox.register("mate", tools.cxTwoPoint)
+    toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.2)
+    toolbox.register("select", tools.selTournament, tournsize=2)
+    toolbox.register("evaluate", evaluar)
+
+def configuraEstadisticasEvolucion():
+    stats = tools.Statistics(lambda ind: ind.fitness.values) 
+    stats.register("avg", np.mean) 
+    stats.register("std", np.std) 
+    stats.register("min", np.min) 
+    stats.register("max", np.max) 
+    
+    return stats
+
+def mutar(individual, indpb):
+    size = len(individual)
+    for i in range(size):
+        if random.random() < indpb:
+            swap_indx = random.randint(0, size - 2)
+            if swap_indx >= i:
+                swap_indx += 1
+            individual[i], individual[swap_indx] = individual[swap_indx], individual[i]
+
+    
+
+    return individual,
+
+def evaluar(individuo):
+    compartimentos = db.__compartimentos__
+    filas = db.__tamano_compartimento__
+    cols = db.__tamano_compartimento__
+
+    num_vacios = compartimentos * filas ** 2 - db.__num_contenedores__
+    vacios = 0
+
+    eval = 0
+
+    contenedores = {}
+    peso_compartimentos = [0 for i in range(0, compartimentos)]
+
+    for i in range(0,compartimentos):
+        peso_compartimentos[i] = 0
+        for j in range(0,filas):
+            for k in range(0, cols):
+                posicion = i * (filas * cols) + (j * cols) + k
+                contenedor = individuo[posicion]
+                pos_superior = obetenerPosSuperior(i, posicion)
+                if pos_superior != -1:
+                    superior = individuo[pos_superior]
+                else:
+                    superior = -1
+
+                if contenedor == -1:
+                    if superior != -1:
+                        eval += -100000
+                    vacios += 1
+                else:
+                    existe = contenedores.get(contenedor)
+                    if existe != None:
+                        eval += -100000
+                    else:
+                        contenedores[contenedor] = 1
+
+                    peso = db.__contenedores__[contenedor][1]
+                    puerto = db.__contenedores__[contenedor][2]
+                    peso_superior = 0
+                    puerto_superior = 0
+                    if superior != -1:
+                        peso_superior = db.__contenedores__[superior][1]
+                        puerto_superior = db.__contenedores__[superior][2]
+                    
+                    dif_peso = peso_superior - peso
+                    eval += dif_peso
+
+                    if puerto_superior <= puerto:
+                        eval += 100
+
+                    peso_compartimentos[i] += peso
+
+    desv = np.std(peso_compartimentos)
+
+    if vacios != num_vacios:
+        eval += -1000
+
+    if desv == 0:
+        desv = 1
+
+    eval += (1 / desv) * 10000
+
+    return eval,
+
+def corregir(individuo):
+    compartimentos = db.__compartimentos__
+    filas = db.__tamano_compartimento__
+    cols = db.__tamano_compartimento__
+
+    for i in range(0, compartimentos):
+        for j in range(0, filas):
+            for k in range(0, cols):
+                posicion = i * (filas * cols) + (j * cols) + k
+                contenedor = individuo[posicion]
+                pos_superior = obetenerPosSuperior(i, posicion)
+                if pos_superior != -1:
+                    superior = individuo[pos_superior]
+                else:
+                    superior = -1
+
+                if contenedor == -1:
+                    if superior != -1:
+                        individuo[posicion]
+
+def obetenerPosSuperior(cont, posicion):
+    tamano = db.__tamano_compartimento__**2
+    ultima_pos = (cont + 1) * tamano
+
+    superior = posicion + db.__tamano_compartimento__
+    if superior >= ultima_pos:
+        return -1
+
+    return superior
+
 
 def crearIndividuo(ind, rows, cols, compartimentos):
     lista_contenedores = listaPorPeso()
