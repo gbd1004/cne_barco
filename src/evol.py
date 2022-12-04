@@ -5,7 +5,7 @@ import numpy as np
 
 def configurarPoblacion(toolbox):
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
+    creator.create("Individual", list, fitness=creator.FitnessMax, pesos=list)
     toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -98,22 +98,30 @@ def evaluar(individuo):
                 else:
                     vacios += 1
 
-    desv = np.std(peso_compartimentos)
 
+    # Sumar penalizaciones
     if vacios != num_vacios:
-        penalizacion += 5000
+        penalizacion += 50000
 
     penalizacion_peso = penalizacion_peso / db.__num_contenedores__
-    penalizacion += penalizacion_peso * 1000
+    penalizacion += penalizacion_peso * 10000
     penalizacion += penalizacion_repetido
 
+    # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
-    eval += evaluacion_puerto * 1000
+    eval += evaluacion_puerto * 10
 
-    if desv == 0:
-        desv = 1
+    # desv = np.std(peso_compartimentos)
+    # if desv == 0:
+    #     desv = 1
 
-    eval += (1 / desv) * 5000
+    # eval += (1 / desv) * 50000
+    max_peso = max(peso_compartimentos)
+    min_peso = min(peso_compartimentos)
+    diferencia = max_peso - min_peso
+    if diferencia == 0:
+        diferencia = 1
+    eval += np.exp((1 / diferencia) * 100) * 10
 
     eval -= penalizacion
 
@@ -174,6 +182,7 @@ def crearIndividuo(ind, rows, cols, compartimentos):
     lista_contenedores = listaPorPeso()
 
     barco = ind([-1 for i in range(0, rows * cols * compartimentos)])
+    barco.pesos = [0 for i in range(0, compartimentos)]
 
     posiciones_validas = initPosicionesValidas(cols, compartimentos)
 
@@ -194,11 +203,14 @@ def crearIndividuo(ind, rows, cols, compartimentos):
         lista_contenedores.remove(contenedor)
 
         barco[pos] = contenedor[1]
+        barco.pesos[compartimento] += db.__contenedores__[contenedor[1]][1]
 
         if posicion[0] < rows - 1:
             posiciones_validas[compartimento][posicion_][0] += 1
         else:
             posiciones_validas[compartimento].remove(posiciones_validas[compartimento][posicion_])
+
+        
 
     return barco
 

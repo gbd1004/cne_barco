@@ -4,9 +4,12 @@ import src.evol as evol
 from deap import base, algorithms, tools
 import matplotlib.pyplot as plt
 
+import matplotlib
+matplotlib.use('TkAgg',force=True)
+
 def main():
     toolbox = base.Toolbox()
-    leer.read_csv('datos/boat_test03.csv')
+    leer.read_csv('datos/boat_test01.csv')
 
     evol.configurarPoblacion(toolbox)
     evol.configurarEvolucion(toolbox)
@@ -14,9 +17,9 @@ def main():
     
     # hof = tools.HallOfFame(5)
 
-    population = toolbox.population(n=20)
+    population = toolbox.population(n=40)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=1000, verbose=False, stats=stats)
 
     output(logbook, population)
     
@@ -27,8 +30,8 @@ def output(logbook, population):
 
     print("La mejor solucion encontrada es: ")
     sol = tools.selBest(population,1)[0]
-    # print(strBarco(sol))
-    # testVaido(sol)
+    print(strBarco(sol))
+    testVaido(sol)
 
     gen = logbook.select("gen")
     avgs = logbook.select("avg")
@@ -56,6 +59,7 @@ def strBarco(ind):
             out += "| "
         out += "\n"
 
+    print(ind.pesos)
     return out
 
 def testVaido(ind):
