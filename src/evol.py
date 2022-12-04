@@ -51,6 +51,11 @@ def evaluar(individuo):
     vacios = 0
 
     eval = 0
+    penalizacion = 0
+    penalizacion_repetido = 0
+    penalizacion_peso = 0
+
+    evaluacion_puerto = 0
 
     contenedores = {}
     peso_compartimentos = [0 for i in range(0, compartimentos)]
@@ -70,19 +75,24 @@ def evaluar(individuo):
                 if contenedor != -1:
                     existe = contenedores.get(contenedor)
                     if existe != None:
-                        eval += -5000
+                        penalizacion_repetido = 50000
                     else:
                         contenedores[contenedor] = 1
 
                     peso = db.__contenedores__[contenedor][1]
                     puerto = db.__contenedores__[contenedor][2]
                     
+                    peso_superior = 0
                     puerto_superior = 0
                     if superior != -1:
                         puerto_superior = db.__contenedores__[superior][2]
+                        peso_superior = db.__contenedores__[superior][1]
+
+                    if peso_superior > peso:
+                        penalizacion_peso += 1
 
                     if puerto_superior <= puerto:
-                        eval += 10
+                        evaluacion_puerto += 1
 
                     peso_compartimentos[i] += peso
                 else:
@@ -91,12 +101,21 @@ def evaluar(individuo):
     desv = np.std(peso_compartimentos)
 
     if vacios != num_vacios:
-        eval += -5000
+        penalizacion += 5000
+
+    penalizacion_peso = penalizacion_peso / db.__num_contenedores__
+    penalizacion += penalizacion_peso * 1000
+    penalizacion += penalizacion_repetido
+
+    evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
+    eval += evaluacion_puerto * 1000
 
     if desv == 0:
         desv = 1
 
-    eval += (1 / desv) * 50000
+    eval += (1 / desv) * 5000
+
+    eval -= penalizacion
 
     return eval,
 

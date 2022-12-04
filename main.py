@@ -6,17 +6,17 @@ import matplotlib.pyplot as plt
 
 def main():
     toolbox = base.Toolbox()
-    leer.read_csv('datos/boat_test06.csv')
+    leer.read_csv('datos/boat_test03.csv')
 
     evol.configurarPoblacion(toolbox)
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
     
-    hof = tools.HallOfFame(5)
+    # hof = tools.HallOfFame(5)
 
     population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=200, verbose=False, stats=stats, halloffame=hof)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=False, stats=stats)
 
     output(logbook, population)
     
@@ -27,7 +27,8 @@ def output(logbook, population):
 
     print("La mejor solucion encontrada es: ")
     sol = tools.selBest(population,1)[0]
-    print(strBarco(sol))
+    # print(strBarco(sol))
+    # testVaido(sol)
 
     gen = logbook.select("gen")
     avgs = logbook.select("avg")
@@ -44,6 +45,7 @@ def output(logbook, population):
     
     plt.show()
 
+
 def strBarco(ind):
     out = ""
     for i in range(db.__tamano_compartimento__ - 1, -1, -1):
@@ -56,5 +58,16 @@ def strBarco(ind):
 
     return out
 
+def testVaido(ind):
+    seen = set()
+    for num in ind:
+        if num in seen:
+            if num != -1:
+                print("INVALIDO")
+                return
+        seen.add(num)
+    print("Valido")
+
 if __name__ == "__main__":
     main()
+
