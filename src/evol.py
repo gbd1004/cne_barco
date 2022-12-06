@@ -5,7 +5,7 @@ import numpy as np
 
 def configurarPoblacion(toolbox):
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax, pesos=list)
+    creator.create("Individual", list, fitness=creator.FitnessMax)
     toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -51,9 +51,6 @@ def evaluar(individuo):
     vacios = 0
 
     eval = 0
-    penalizacion = 0
-    penalizacion_repetido = 0
-    penalizacion_peso = 0
 
     evaluacion_puerto = 0
 
@@ -75,21 +72,16 @@ def evaluar(individuo):
                 if contenedor != -1:
                     existe = contenedores.get(contenedor)
                     if existe != None:
-                        penalizacion_repetido = 50000
+                        return -1,
                     else:
                         contenedores[contenedor] = 1
 
                     peso = db.__contenedores__[contenedor][1]
                     puerto = db.__contenedores__[contenedor][2]
-                    
-                    peso_superior = 0
+
                     puerto_superior = 0
                     if superior != -1:
                         puerto_superior = db.__contenedores__[superior][2]
-                        peso_superior = db.__contenedores__[superior][1]
-
-                    if peso_superior > peso:
-                        penalizacion_peso += 1
 
                     if puerto_superior <= puerto:
                         evaluacion_puerto += 1
@@ -98,32 +90,20 @@ def evaluar(individuo):
                 else:
                     vacios += 1
 
-
-    # Sumar penalizaciones
+    # No valido
     if vacios != num_vacios:
-        penalizacion += 50000
-
-    penalizacion_peso = penalizacion_peso / db.__num_contenedores__
-    penalizacion += penalizacion_peso * 10000
-    penalizacion += penalizacion_repetido
+        return -1,
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
-    eval += evaluacion_puerto * 10
+    eval += evaluacion_puerto * 20
 
-    # desv = np.std(peso_compartimentos)
-    # if desv == 0:
-    #     desv = 1
-
-    # eval += (1 / desv) * 50000
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)
     diferencia = max_peso - min_peso
     if diferencia == 0:
         diferencia = 1
-    eval += np.exp((1 / diferencia) * 100) * 10
-
-    eval -= penalizacion
+    eval += np.exp((1 / diferencia) * db.__tamano_compartimento__ * db.__num_contenedores__) * 10
 
     return eval,
 
@@ -142,30 +122,44 @@ def strBarco(ind):
 
 def corregir(individuo):
     compartimentos = db.__compartimentos__
-    filas = db.__tamano_compartimento__
     cols = db.__tamano_compartimento__
 
-    for i in range(0,compartimentos):
-        for j in range(0,filas):
-            for k in range(0, cols):
-                posicion = i * (filas * cols) + (j * cols) + k
-                contenedor = individuo[posicion]
-                pos_superior = obetenerPosSuperior(i, posicion)
-                if pos_superior != -1:
-                    superior = individuo[pos_superior]
-                else:
-                    superior = -1
+    for compartimento in range(0, compartimentos):
+        for col in range(0, cols):
+            columna = obtenerColumna(individuo, compartimento, col)
+            peso_columna = obtenerPeso(columna)
+            colocarColumna(individuo, peso_columna, compartimento, col)
 
-                if contenedor == -1:
-                    if superior != -1:
-                        individuo[posicion], individuo[pos_superior] = individuo[pos_superior], individuo[posicion]
-                else:
-                    if superior != -1:
-                        peso = db.__contenedores__[contenedor][1]
-                        peso_superior = db.__contenedores__[superior][1]
+def obtenerColumna(individuo, compartimento, col):
+    filas = db.__tamano_compartimento__
 
-                        if peso_superior > peso:
-                            individuo[posicion], individuo[pos_superior] = individuo[pos_superior], individuo[posicion]
+    elementos = []
+    pos = compartimento * (filas ** 2) + col
+    for i in range(0, filas):
+        elementos.append(individuo[pos])
+        pos += filas
+
+    return elementos
+
+def colocarColumna(individuo, columna: list, compartimento, col):
+    filas = db.__tamano_compartimento__
+    columna.sort(reverse=True)
+
+    pos = compartimento * (filas ** 2) + col
+    for i in range(0, filas):
+        individuo[pos] = columna[i][1]
+        pos += filas
+
+def obtenerPeso(columna):
+    elementos = []
+
+    for i in columna:
+        if i == -1:
+            elementos.append((0, i))
+        else:
+            elementos.append((db.__contenedores__[i][1], i))
+
+    return elementos
 
 def obetenerPosSuperior(cont, posicion):
     tamano = db.__tamano_compartimento__**2
@@ -182,7 +176,6 @@ def crearIndividuo(ind, rows, cols, compartimentos):
     lista_contenedores = listaPorPeso()
 
     barco = ind([-1 for i in range(0, rows * cols * compartimentos)])
-    barco.pesos = [0 for i in range(0, compartimentos)]
 
     posiciones_validas = initPosicionesValidas(cols, compartimentos)
 
@@ -203,7 +196,6 @@ def crearIndividuo(ind, rows, cols, compartimentos):
         lista_contenedores.remove(contenedor)
 
         barco[pos] = contenedor[1]
-        barco.pesos[compartimento] += db.__contenedores__[contenedor[1]][1]
 
         if posicion[0] < rows - 1:
             posiciones_validas[compartimento][posicion_][0] += 1
