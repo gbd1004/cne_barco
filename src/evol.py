@@ -93,10 +93,12 @@ def evaluar(individuo):
 
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)
-    diferencia = max_peso - min_peso
-    if diferencia == 0:
-        diferencia = 1
-    eval += np.exp((1 / diferencia)  * 10000)
+    # diferencia = max_peso - min_peso
+    # if diferencia == 0:
+    #     diferencia = 1
+    # eval += np.exp((1 / diferencia) * db.__num_contenedores__ * 20)
+    div = min_peso / max_peso
+    eval += np.exp(div * 5)
 
     return eval,
 

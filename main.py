@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
-test = "boat_test04"
+test = "boat_test06"
 
 def main():
     toolbox = base.Toolbox()
@@ -21,7 +21,7 @@ def main():
 
     population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=5000, verbose=False, stats=stats)
 
-    output(logbook, population, debug=False)
+    output(logbook, population, debug=True)
     
     
 def output(logbook, population, debug=False):
