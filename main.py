@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
-test = "boat_test06"
+test = "boat_test03"
 
 def main():
     toolbox = base.Toolbox()
@@ -19,9 +19,9 @@ def main():
 
     population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=5000, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=10000, verbose=False, stats=stats)
 
-    output(logbook, population, debug=True)
+    output(logbook, population)
     
     
 def output(logbook, population, debug=False):
@@ -42,18 +42,14 @@ def output(logbook, population, debug=False):
     maxs = logbook.select("max")
     mins = logbook.select("min")
     
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    f, ax = plt.subplots()
     
-    line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")    
-    line2 = ax2.plot(gen, maxs, "g-", label="Max Fitness")
-    line3 = ax3.plot(gen, mins, "b-", label="Min Fitness")
-    ax1.set_xlabel("Generation")
-    ax1.set_ylabel("Fitness (AVG)", color="r")
-    ax2.set_xlabel("Generation")
-    ax2.set_ylabel("Fitness (MAX)", color="g")
-    ax3.set_xlabel("Generation")
-    ax3.set_ylabel("Fitness (MIN)", color="b")
-    
+    line1 = ax.plot(gen, avgs, "r-", label="Average Fitness")    
+    line2 = ax.plot(gen, maxs, "g-", label="Max Fitness")
+    line3 = ax.plot(gen, mins, "b-", label="Min Fitness")
+    ax.set_xlabel("Generation")
+    ax.set_ylabel("Fitness", color="r")
+
     plt.show()
 
 def printBarco(ind):
