@@ -62,27 +62,29 @@ def evaluar(individuo):
                 contenedor = individuo[posicion]
                 superior = obtenerSuperior(i, posicion, individuo)
 
-                if contenedor != -1:
-                    existe = contenedores.get(contenedor)
-                    # No valido
-                    if existe != None:
-                        return -1,
-                    else:
-                        contenedores[contenedor] = 1
-
-                    peso = db.__contenedores__[contenedor][1]
-                    puerto = db.__contenedores__[contenedor][2]
-
-                    puerto_superior = 0
-                    if superior != -1:
-                        puerto_superior = db.__contenedores__[superior][2]
-
-                    if puerto_superior <= puerto:
-                        evaluacion_puerto += 1
-
-                    peso_compartimentos[i] += peso
-                else:
+                if contenedor == -1:
                     vacios += 1
+                    continue
+
+                existe = contenedores.get(contenedor)
+                # No valido
+                if existe != None:
+                    return -1,
+                
+                contenedores[contenedor] = 1
+
+                peso = db.__contenedores__[contenedor][1]
+                puerto = db.__contenedores__[contenedor][2]
+
+                puerto_superior = 0
+                if superior != -1:
+                    puerto_superior = db.__contenedores__[superior][2]
+
+                if puerto_superior <= puerto:
+                    evaluacion_puerto += 1
+
+                peso_compartimentos[i] += peso
+
 
     # No valido
     if vacios != num_vacios:
