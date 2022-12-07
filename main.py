@@ -21,7 +21,7 @@ def main():
 
     population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=False, stats=stats)
 
-    output(logbook, population, debug=True)
+    output(logbook, population)
     
     
 def output(logbook, population, debug=False):

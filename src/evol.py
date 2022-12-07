@@ -11,8 +11,6 @@ def configurarPoblacion(toolbox):
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def configurarEvolucion(toolbox):
-    # toolbox.register("mate", tools.cxPartialyMatched)
-    # toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.2)
     toolbox.register("mate", cruzar)
     toolbox.register("mutate", mutar, indpb=0.2)
     toolbox.register("select", tools.selTournament, tournsize=2)
@@ -51,7 +49,6 @@ def evaluar(individuo):
     vacios = 0
 
     eval = 0
-
     evaluacion_puerto = 0
 
     contenedores = {}
@@ -63,11 +60,7 @@ def evaluar(individuo):
             for k in range(0, cols):
                 posicion = i * (filas * cols) + (j * cols) + k
                 contenedor = individuo[posicion]
-                pos_superior = obetenerPosSuperior(i, posicion)
-                if pos_superior != -1:
-                    superior = individuo[pos_superior]
-                else:
-                    superior = -1
+                superior = obtenerSuperior(i, posicion, individuo)
 
                 if contenedor != -1:
                     existe = contenedores.get(contenedor)
@@ -169,6 +162,14 @@ def obetenerPosSuperior(cont, posicion):
     if superior >= ultima_pos:
         return -1
 
+    return superior
+
+def obtenerSuperior(cont, posicion, individuo):
+    pos_superior = obetenerPosSuperior(cont, posicion)
+    if pos_superior != -1:
+        superior = individuo[pos_superior]
+    else:
+        superior = -1
     return superior
 
 
