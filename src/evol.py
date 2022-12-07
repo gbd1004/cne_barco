@@ -13,7 +13,7 @@ def configurarPoblacion(toolbox):
 def configurarEvolucion(toolbox):
     toolbox.register("mate", cruzar)
     toolbox.register("mutate", mutar, indpb=0.2)
-    toolbox.register("select", tools.selTournament, tournsize=2)
+    toolbox.register("select", tools.selTournament, tournsize=4)
     toolbox.register("evaluate", evaluar)
 
 def configuraEstadisticasEvolucion():
@@ -96,7 +96,7 @@ def evaluar(individuo):
     diferencia = max_peso - min_peso
     if diferencia == 0:
         diferencia = 1
-    eval += np.exp((1 / diferencia) * db.__tamano_compartimento__ * db.__num_contenedores__) * 10
+    eval += np.exp((1 / diferencia)  * 10000)
 
     return eval,
 
