@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
-test = "boat_test03"
+test = "boat_test01"
 
 def main():
     toolbox = base.Toolbox()
@@ -21,7 +21,7 @@ def main():
 
     population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=10000, verbose=False, stats=stats)
 
-    output(logbook, population)
+    output(logbook, population, debug=True)
     
     
 def output(logbook, population, debug=False):
@@ -42,13 +42,17 @@ def output(logbook, population, debug=False):
     maxs = logbook.select("max")
     mins = logbook.select("min")
     
-    f, ax = plt.subplots()
+    f, (ax1, ax2, ax3) = plt.subplots(1, 3)
     
-    line1 = ax.plot(gen, avgs, "r-", label="Average Fitness")    
-    line2 = ax.plot(gen, maxs, "g-", label="Max Fitness")
-    line3 = ax.plot(gen, mins, "b-", label="Min Fitness")
-    ax.set_xlabel("Generation")
-    ax.set_ylabel("Fitness", color="r")
+    line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")    
+    line2 = ax2.plot(gen, maxs, "g-", label="Max Fitness")
+    line3 = ax3.plot(gen, mins, "b-", label="Min Fitness")
+    ax1.set_xlabel("Generation")
+    ax1.set_ylabel("Fitness (AVG)", color="r")
+    ax2.set_xlabel("Generation")
+    ax2.set_ylabel("Fitness (MAX)", color="g")
+    ax3.set_xlabel("Generation")
+    ax3.set_ylabel("Fitness (MIN)", color="b")
 
     plt.show()
 
