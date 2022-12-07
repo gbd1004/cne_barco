@@ -18,3 +18,17 @@ def read_csv(path: str) -> None:
 
         for row in reader:
             db.__contenedores__.append([row[0], int(row[1]), int(row[2]), int(row[3])])
+
+def write_csv(ind, path):
+    with open(f"salida/{path}_out.csv", "w") as file:
+        csvwriter = csv.writer(file)
+        cabecera = [str(db.__compartimentos__), str(db.__num_contenedores__)]
+
+        csvwriter.writerow(cabecera)
+
+        for i in range(0, db.__compartimentos__):
+            row = []
+            for j in range(0, db.__tamano_compartimento__ ** 2):
+                row.append(str(ind[i * (db.__tamano_compartimento__ ** 2) + j]))
+            
+            csvwriter.writerow(row)

@@ -1,5 +1,5 @@
 import src.datosBarco as db
-import src.leer as leer
+import src.csv as csv
 import src.evol as evol
 from deap import base, algorithms, tools
 import matplotlib.pyplot as plt
@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
+test = "boat_test06"
+
 def main():
     toolbox = base.Toolbox()
-    leer.read_csv('datos/boat_test01.csv')
+    csv.read_csv(f'datos/{test}.csv')
 
     evol.configurarPoblacion(toolbox)
     evol.configurarEvolucion(toolbox)
@@ -17,22 +19,23 @@ def main():
 
     population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=1000, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=False, stats=stats)
 
-    output(logbook, population)
+    output(logbook, population, debug=True)
     
     
 def output(logbook, population, debug=False):
     print("La mejor solucion encontrada es: ")
     sol = tools.selBest(population,1)[0]
-
+    
+    printBarco(sol)
     if debug:
         print(strBarco(sol))
         print(strBarcoPesos(sol))
         print(strBarcoPuerto(sol))
         testVaido(sol)
 
-    printBarco(sol)
+    csv.write_csv(sol, test)
 
     gen = logbook.select("gen")
     avgs = logbook.select("avg")
