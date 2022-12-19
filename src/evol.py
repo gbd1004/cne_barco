@@ -91,7 +91,7 @@ def evaluar(ind):
                 contenedor = ind[posicion]
                 superior = obtenerSuperior(i, posicion, ind)
 
-                if contenedor == -1:
+                if contenedor >= db.__num_contenedores__:
                     continue
 
                 peso = obtenerValor(contenedor, 1)
@@ -299,6 +299,12 @@ def crearIndividuo(ind, rows, cols, compartimentos):
             posiciones_validas[compartimento][posicion_][0] += 1
         else:
             posiciones_validas[compartimento].remove(posiciones_validas[compartimento][posicion_])
+
+    id_vacio = db.__num_contenedores__
+    for i in range(len(barco)):
+        if barco[i] == -1:
+            barco[i] = id_vacio
+            id_vacio += 1
 
     return barco
 
