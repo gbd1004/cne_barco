@@ -28,8 +28,8 @@ def configuraEstadisticasEvolucion():
 def cruzar(ind1, ind2):
     ind1, ind2 = tools.cxPartialyMatched(ind1, ind2)
 
-    corregir(ind1)
-    corregir(ind2)
+    # corregir(ind1)
+    # corregir(ind2)
 
     return ind1, ind2
 
@@ -50,6 +50,8 @@ def evaluar(individuo):
 
     eval = 0
     evaluacion_puerto = 0
+
+    invalidos = 0
 
     contenedores = {}
     peso_compartimentos = [0 for i in range(0, compartimentos)]
@@ -92,12 +94,13 @@ def evaluar(individuo):
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
-    eval += evaluacion_puerto * 20
+    eval += evaluacion_puerto * 30
 
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)
     div = min_peso / max_peso
     eval += np.exp(div * 5)
+    eval -= invalidos * 5
 
     return eval,
 

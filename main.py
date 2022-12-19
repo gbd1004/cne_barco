@@ -17,9 +17,9 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    population = toolbox.population(n=20)
+    population = toolbox.population(n=200)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=1000, verbose=True, stats=stats)
 
     output(logbook, population, debug=True)
     
@@ -42,17 +42,17 @@ def output(logbook, population, debug=False):
     maxs = logbook.select("max")
     mins = logbook.select("min")
     
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    f, ax1 = plt.subplots(1, 1)
     
     line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")    
-    line2 = ax2.plot(gen, maxs, "g-", label="Max Fitness")
-    line3 = ax3.plot(gen, mins, "b-", label="Min Fitness")
+    line2 = ax1.plot(gen, maxs, "g-", label="Max Fitness")
+    line3 = ax1.plot(gen, mins, "b-", label="Min Fitness")
     ax1.set_xlabel("Generation")
     ax1.set_ylabel("Fitness (AVG)", color="r")
-    ax2.set_xlabel("Generation")
-    ax2.set_ylabel("Fitness (MAX)", color="g")
-    ax3.set_xlabel("Generation")
-    ax3.set_ylabel("Fitness (MIN)", color="b")
+    ax1.set_xlabel("Generation")
+    ax1.set_ylabel("Fitness (MAX)", color="g")
+    ax1.set_xlabel("Generation")
+    ax1.set_ylabel("Fitness (MIN)", color="b")
 
     plt.show()
 
