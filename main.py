@@ -1,7 +1,7 @@
 import src.datosBarco as db
 import src.csv as csv
 import src.evol as evol
-from deap import base, algorithms, tools
+from deap import base, algorithms, tools, creator
 import matplotlib.pyplot as plt
 
 import matplotlib
@@ -19,20 +19,22 @@ def main():
 
     population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=10000, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=False, stats=stats)
 
-    output(logbook, population, debug=True)
+    output(logbook, population)
     
     
 def output(logbook, population, debug=False):
     print("La mejor solucion encontrada es: ")
     sol = tools.selBest(population,1)[0]
-    
+    # sol = tools.selNSGA2(population, 1)[0]
+
     printBarco(sol)
     if debug:
         print(strBarco(sol))
         print(strBarcoPesos(sol))
         print(strBarcoPuerto(sol))
+        print(strBarcoPeligro(sol))
         testVaido(sol)
 
     csv.write_csv(sol, test)
@@ -114,12 +116,29 @@ def strBarcoPuerto(ind):
         out += "\n"
     return out
 
+def strBarcoPeligro(ind):
+    out = ""
+    for i in range(db.__tamano_compartimento__ - 1, -1, -1):
+        out += "| "
+        for j in range(0, db.__compartimentos__):
+            for k in range(0, db.__tamano_compartimento__):
+                indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
+                if indiv == -1:
+                    peligro = -1
+                else:
+                    peligro = db.__contenedores__[indiv][3]
+                out += str(peligro).rjust(4) + " "
+            out += "| "
+        out += "\n"
+    return out
+
 def testVaido(ind):
     seen = set()
     for num in ind:
         if num in seen:
             if num != -1:
                 print("INVALIDO")
+                print(num)
                 return
         seen.add(num)
     print("Valido")

@@ -4,7 +4,7 @@ import src.datosBarco as db
 import numpy as np
 
 def configurarPoblacion(toolbox):
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+    creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
     creator.create("Individual", list, fitness=creator.FitnessMax)
     toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
@@ -13,111 +13,154 @@ def configurarPoblacion(toolbox):
 def configurarEvolucion(toolbox):
     toolbox.register("mate", cruzar)
     toolbox.register("mutate", mutar, indpb=0.2)
-    toolbox.register("select", tools.selTournament, tournsize=4)
+    # toolbox.register("select", tools.selTournament, tournsize=4)
+    toolbox.register("select", tools.selSPEA2)
     toolbox.register("evaluate", evaluar)
 
 def configuraEstadisticasEvolucion():
     stats = tools.Statistics(lambda ind: ind.fitness.values) 
-    stats.register("avg", np.mean) 
-    stats.register("std", np.std) 
-    stats.register("min", np.min) 
-    stats.register("max", np.max) 
+    stats.register("avg", np.mean, axis=1)
+    stats.register("std", np.std, axis=1)
+    stats.register("min", np.min, axis=1)
+    stats.register("max", np.max, axis=1)
     
     return stats
 
 def cruzar(ind1, ind2):
     ind1, ind2 = tools.cxPartialyMatched(ind1, ind2)
 
-    corregir(ind1)
-    corregir(ind2)
+    corregirRepetidos(ind1)
+    corregirRepetidos(ind2)
+    corregirPesos(ind1)
+    corregirPesos(ind2)
 
     return ind1, ind2
 
 def mutar(individual, indpb):
     individual = tools.mutShuffleIndexes(individual, indpb)
 
-    corregir(individual[0])
+    corregirPesos(individual[0])
 
     return individual
 
-def evaluar(individuo):
+def evaluarPeligro(ind, contenedor, posicion, i, j):
+    peligro_actual = obtenerValor(contenedor, 3)
+
+    if peligro_actual == 0:
+        return 0
+
+    superior = obtenerSuperior(i, posicion, ind)
+    peligro_superior = obtenerValor(superior, 3)
+    if peligro_superior == 1:
+        return -1
+
+    inferior = obtenerInferior(i, posicion, ind)
+    peligro_inferior = obtenerValor(inferior, 3)
+    if peligro_inferior == 1:
+        return -1
+
+    izquierdo = obtenerIzquierdo(j, i, posicion, ind)
+    peligro_izquierdo = obtenerValor(izquierdo, 3)
+    if peligro_izquierdo == 1:
+        return -1
+
+    derecho = obtenerDerecho(j, i, posicion, ind)
+    peligro_derecho = obtenerValor(derecho, 3)
+    if peligro_derecho == 1:
+        return -1
+
+    return 0
+
+def evaluar(ind):
     compartimentos = db.__compartimentos__
     filas = db.__tamano_compartimento__
     cols = db.__tamano_compartimento__
 
-    num_vacios = compartimentos * filas ** 2 - db.__num_contenedores__
-    vacios = 0
-
-    eval = 0
-    evaluacion_puerto = 0
-
-    contenedores = {}
     peso_compartimentos = [0 for i in range(0, compartimentos)]
+    
+    evaluacion_puerto = 0
+    evaluacion_peligro = db.__num_contenedores__
+    eval_puerto = 0
+    eval_peligro = 0
 
     for i in range(0,compartimentos):
         peso_compartimentos[i] = 0
         for j in range(0,filas):
             for k in range(0, cols):
                 posicion = i * (filas * cols) + (j * cols) + k
-                contenedor = individuo[posicion]
-                superior = obtenerSuperior(i, posicion, individuo)
+                contenedor = ind[posicion]
+                superior = obtenerSuperior(i, posicion, ind)
 
                 if contenedor == -1:
-                    vacios += 1
                     continue
 
-                existe = contenedores.get(contenedor)
-                # No valido
-                if existe != None:
-                    return -1,
-                
-                contenedores[contenedor] = 1
+                peso = obtenerValor(contenedor, 1)
+                puerto = obtenerValor(contenedor, 2)
 
-                peso = db.__contenedores__[contenedor][1]
-                puerto = db.__contenedores__[contenedor][2]
-
-                puerto_superior = 0
-                if superior != -1:
-                    puerto_superior = db.__contenedores__[superior][2]
+                puerto_superior = obtenerValor(superior, 2)
 
                 if puerto_superior <= puerto:
                     evaluacion_puerto += 1
 
                 peso_compartimentos[i] += peso
 
+                evaluacion_peligro -= evaluarPeligro(ind, contenedor, posicion, i, j)
 
-    # No valido
-    if vacios != num_vacios:
-        return -1,
+
+    evaluacion_peligro =  evaluacion_peligro / db.__num_contenedores__
+    eval_peligro += evaluacion_peligro * 40
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
-    eval += evaluacion_puerto * 20
+    eval_puerto += evaluacion_puerto * 40
 
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)
     div = min_peso / max_peso
-    eval += np.exp(div * 5)
+    eval_peligro += np.exp(div * 5)
+    eval_puerto += np.exp(div * 5)
 
-    return eval,
+    return eval_puerto, eval_peligro
 
+def obtenerValor(pos, indice):
+    val = 0
+    if pos != -1:
+        val = db.__contenedores__[pos][indice]
 
-def strBarco(ind):
-    out = ""
-    for i in range(db.__tamano_compartimento__ - 1, -1, -1):
-        out += "| "
-        for j in range(0, db.__compartimentos__):
-            for k in range(0, db.__tamano_compartimento__):
-                out += str(ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]).rjust(4) + " "
-            out += "| "
-        out += "\n"
+    return val
 
-    return out
+def corregirRepetidos(individuo):
+    contenedores_sin_colocar = [i for i in range(0, db.__num_contenedores__)]
 
-def corregir(individuo):
+    ocurrencias = {}
+
+    for ind, i in enumerate(individuo):
+        if i in ocurrencias:
+            ocurrencias[i].append(ind)
+            continue
+        elif i != -1:
+            contenedores_sin_colocar.remove(i)
+
+        ocurrencias[i] = [ind]
+    
+    repetidos = {}
+    for i in ocurrencias:
+        if i != -1 and len(ocurrencias[i]) > 1:
+            repetidos[i] = ocurrencias[i]
+
+    for i in repetidos:
+        for j in range(1, len(repetidos[i])):
+            if len(contenedores_sin_colocar) > 0:
+                random.shuffle(contenedores_sin_colocar)
+                contenedor = contenedores_sin_colocar.pop()
+            else:
+                contenedor = -1
+
+            individuo[repetidos[i][j]] = contenedor
+
+def corregirPesos(individuo):
     compartimentos = db.__compartimentos__
     cols = db.__tamano_compartimento__
-
     for compartimento in range(0, compartimentos):
         for col in range(0, cols):
             columna = obtenerColumna(individuo, compartimento, col)
@@ -173,6 +216,59 @@ def obtenerSuperior(cont, posicion, individuo):
         superior = -1
     return superior
 
+def obetenerPosInferior(cont, posicion):
+    tamano = db.__tamano_compartimento__**2
+    primera_pos = cont * tamano
+
+    inferior = posicion - db.__tamano_compartimento__
+    if inferior < primera_pos:
+        return -1
+
+    return inferior
+
+def obtenerInferior(cont, posicion, individuo):
+    pos_inferior = obetenerPosInferior(cont, posicion)
+    if pos_inferior != -1:
+        inferior = individuo[pos_inferior]
+    else:
+        inferior = -1
+    return inferior
+
+def obetenerPosIzquierdo(fila, cont, posicion):
+    tamano = db.__tamano_compartimento__
+    primera_pos = cont * (tamano ** 2) + fila * tamano
+
+    izquierdo = posicion - 1
+    if izquierdo < primera_pos:
+        return -1
+
+    return izquierdo
+
+def obtenerIzquierdo(fila, cont, posicion, individuo):
+    pos_izquierdo = obetenerPosIzquierdo(fila, cont, posicion)
+    if pos_izquierdo != -1:
+        izquierdo = individuo[pos_izquierdo]
+    else:
+        izquierdo = -1
+    return izquierdo
+
+def obetenerPosDerecho(fila, cont, posicion):
+    tamano = db.__tamano_compartimento__
+    ultima_pos = cont * (tamano ** 2) + (fila + 1) * tamano
+
+    derecho = posicion + 1
+    if derecho >= ultima_pos:
+        return -1
+
+    return derecho
+
+def obtenerDerecho(fila, cont, posicion, individuo):
+    pos_derecho = obetenerPosDerecho(fila, cont, posicion)
+    if pos_derecho != -1:
+        derecho = individuo[pos_derecho]
+    else:
+        derecho = -1
+    return derecho
 
 def crearIndividuo(ind, rows, cols, compartimentos):
     lista_contenedores = listaPorPeso()
@@ -204,8 +300,6 @@ def crearIndividuo(ind, rows, cols, compartimentos):
         else:
             posiciones_validas[compartimento].remove(posiciones_validas[compartimento][posicion_])
 
-        
-
     return barco
 
 def initPosicionesValidas(cols, compartimentos):
@@ -222,3 +316,15 @@ def listaPorPeso():
     lista = [[a[1], i] for i, a in enumerate(db.__contenedores__)]
     lista.sort(reverse=True)
     return lista
+
+def strBarco(ind):
+    out = ""
+    for i in range(db.__tamano_compartimento__ - 1, -1, -1):
+        out += "| "
+        for j in range(0, db.__compartimentos__):
+            for k in range(0, db.__tamano_compartimento__):
+                out += str(ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]).rjust(4) + " "
+            out += "| "
+        out += "\n"
+
+    return out
