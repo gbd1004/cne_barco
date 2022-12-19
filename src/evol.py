@@ -4,7 +4,7 @@ import src.datosBarco as db
 import numpy as np
 
 def configurarPoblacion(toolbox):
-    creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
+    creator.create("FitnessMax", base.Fitness, weights=(1.0, 1.0))
     creator.create("Individual", list, fitness=creator.FitnessMax)
     toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
@@ -14,23 +14,22 @@ def configurarEvolucion(toolbox):
     toolbox.register("mate", cruzar)
     toolbox.register("mutate", mutar, indpb=0.2)
     # toolbox.register("select", tools.selTournament, tournsize=4)
-    toolbox.register("select", tools.selSPEA2)
+    # toolbox.register("select", tools.selSPEA2)
+    toolbox.register("select", tools.selNSGA2)
     toolbox.register("evaluate", evaluar)
 
 def configuraEstadisticasEvolucion():
     stats = tools.Statistics(lambda ind: ind.fitness.values) 
-    stats.register("avg", np.mean, axis=1)
-    stats.register("std", np.std, axis=1)
-    stats.register("min", np.min, axis=1)
-    stats.register("max", np.max, axis=1)
+    stats.register("avg", np.mean, axis=0)
+    stats.register("std", np.std, axis=0)
+    stats.register("min", np.min, axis=0)
+    stats.register("max", np.max, axis=0)
     
     return stats
 
 def cruzar(ind1, ind2):
     ind1, ind2 = tools.cxPartialyMatched(ind1, ind2)
 
-    corregirRepetidos(ind1)
-    corregirRepetidos(ind2)
     corregirPesos(ind1)
     corregirPesos(ind2)
 
@@ -52,22 +51,22 @@ def evaluarPeligro(ind, contenedor, posicion, i, j):
     superior = obtenerSuperior(i, posicion, ind)
     peligro_superior = obtenerValor(superior, 3)
     if peligro_superior == 1:
-        return -1
+        return 1
 
     inferior = obtenerInferior(i, posicion, ind)
     peligro_inferior = obtenerValor(inferior, 3)
     if peligro_inferior == 1:
-        return -1
+        return 1
 
     izquierdo = obtenerIzquierdo(j, i, posicion, ind)
     peligro_izquierdo = obtenerValor(izquierdo, 3)
     if peligro_izquierdo == 1:
-        return -1
+        return 1
 
     derecho = obtenerDerecho(j, i, posicion, ind)
     peligro_derecho = obtenerValor(derecho, 3)
     if peligro_derecho == 1:
-        return -1
+        return 1
 
     return 0
 
@@ -79,7 +78,7 @@ def evaluar(ind):
     peso_compartimentos = [0 for i in range(0, compartimentos)]
     
     evaluacion_puerto = 0
-    evaluacion_peligro = db.__num_contenedores__
+    evaluacion_peligro = db.__num_peligrosos__
     eval_puerto = 0
     eval_peligro = 0
 
@@ -107,8 +106,8 @@ def evaluar(ind):
                 evaluacion_peligro -= evaluarPeligro(ind, contenedor, posicion, i, j)
 
 
-    evaluacion_peligro =  evaluacion_peligro / db.__num_contenedores__
-    eval_peligro += evaluacion_peligro * 40
+    evaluacion_peligro =  evaluacion_peligro / db.__num_peligrosos__
+    eval_peligro += evaluacion_peligro
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
@@ -117,46 +116,17 @@ def evaluar(ind):
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)
     div = min_peso / max_peso
-    eval_peligro += np.exp(div * 5)
+    # eval_peligro += np.exp(div * 5)
     eval_puerto += np.exp(div * 5)
 
     return eval_puerto, eval_peligro
 
 def obtenerValor(pos, indice):
     val = 0
-    if pos != -1:
+    if pos != -1 and pos < db.__num_contenedores__:
         val = db.__contenedores__[pos][indice]
 
     return val
-
-def corregirRepetidos(individuo):
-    contenedores_sin_colocar = [i for i in range(0, db.__num_contenedores__)]
-
-    ocurrencias = {}
-
-    for ind, i in enumerate(individuo):
-        if i in ocurrencias:
-            ocurrencias[i].append(ind)
-            continue
-        elif i != -1:
-            contenedores_sin_colocar.remove(i)
-
-        ocurrencias[i] = [ind]
-    
-    repetidos = {}
-    for i in ocurrencias:
-        if i != -1 and len(ocurrencias[i]) > 1:
-            repetidos[i] = ocurrencias[i]
-
-    for i in repetidos:
-        for j in range(1, len(repetidos[i])):
-            if len(contenedores_sin_colocar) > 0:
-                random.shuffle(contenedores_sin_colocar)
-                contenedor = contenedores_sin_colocar.pop()
-            else:
-                contenedor = -1
-
-            individuo[repetidos[i][j]] = contenedor
 
 def corregirPesos(individuo):
     compartimentos = db.__compartimentos__
@@ -191,7 +161,7 @@ def obtenerPeso(columna):
     elementos = []
 
     for i in columna:
-        if i == -1:
+        if i >= db.__num_contenedores__:
             elementos.append((0, i))
         else:
             elementos.append((db.__contenedores__[i][1], i))

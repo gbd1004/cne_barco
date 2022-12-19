@@ -19,11 +19,11 @@ def main():
 
     population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=1000, verbose=False, stats=stats)
 
-    output(logbook, population)
-    
-    
+    output(logbook, population, True)
+
+
 def output(logbook, population, debug=False):
     print("La mejor solucion encontrada es: ")
     sol = tools.selBest(population,1)[0]
@@ -43,18 +43,38 @@ def output(logbook, population, debug=False):
     avgs = logbook.select("avg")
     maxs = logbook.select("max")
     mins = logbook.select("min")
-    
+
+    # f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+
+    # line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")
+    # line2 = ax2.plot(gen, maxs, "g-", label="Max Fitness")
+    # line3 = ax3.plot(gen, mins, "b-", label="Min Fitness")
+    # ax1.set_xlabel("Generation")
+    # ax1.set_ylabel("Fitness (AVG)", color="r")
+    # ax2.set_xlabel("Generation")
+    # ax2.set_ylabel("Fitness (MAX)", color="g")
+    # ax3.set_xlabel("Generation")
+    # ax3.set_ylabel("Fitness (MIN)", color="b")
     f, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    
-    line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")    
-    line2 = ax2.plot(gen, maxs, "g-", label="Max Fitness")
-    line3 = ax3.plot(gen, mins, "b-", label="Min Fitness")
-    ax1.set_xlabel("Generation")
-    ax1.set_ylabel("Fitness (AVG)", color="r")
-    ax2.set_xlabel("Generation")
-    ax2.set_ylabel("Fitness (MAX)", color="g")
-    ax3.set_xlabel("Generation")
-    ax3.set_ylabel("Fitness (MIN)", color="b")
+
+    maxs_x = [i[0] for i in maxs]
+    maxs_y = [i[1] for i in maxs]
+    avgs_x = [i[0] for i in avgs]
+    avgs_y = [i[1] for i in avgs]
+    mins_x = [i[0] for i in mins]
+    mins_y = [i[1] for i in mins]
+
+    ax1.scatter(maxs_x, maxs_y, label="Average Fitness")
+    ax1.set_xlabel("Puertos")
+    ax1.set_ylabel("Peligrosidad")
+
+    ax2.plot(gen, avgs_x, "r-", label="Average Fitness")
+    ax2.plot(gen, maxs_x, "g-", label="Max Fitness")
+    ax2.plot(gen, mins_x, "b-", label="Min Fitness")
+
+    ax3.plot(gen, avgs_y, "r-", label="Average Fitness")
+    ax3.plot(gen, maxs_y, "g-", label="Max Fitness")
+    ax3.plot(gen, mins_y, "b-", label="Min Fitness")
 
     plt.show()
 
@@ -76,7 +96,11 @@ def strBarco(ind):
         out += "| "
         for j in range(0, db.__compartimentos__):
             for k in range(0, db.__tamano_compartimento__):
-                out += str(ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]).rjust(4) + " "
+                indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
+                if indiv >= db.__num_contenedores__:
+                    out += " ".rjust(4) + " "
+                else:
+                    out += str(indiv).rjust(4) + " "
             out += "| "
         out += "\n"
     return out
@@ -89,12 +113,14 @@ def strBarcoPesos(ind):
         for j in range(0, db.__compartimentos__):
             for k in range(0, db.__tamano_compartimento__):
                 indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
-                if indiv == -1:
+                if indiv >= db.__num_contenedores__:
                     peso = 0
+                    pesostr = " "
                 else:
                     peso = db.__contenedores__[indiv][1]
+                    pesostr = str(db.__contenedores__[indiv][1])
+                out += pesostr.rjust(4) + " "
                 pesos[j] += peso
-                out += str(peso).rjust(4) + " "
             out += "| "
         out += "\n"
     print(pesos)
@@ -107,11 +133,11 @@ def strBarcoPuerto(ind):
         for j in range(0, db.__compartimentos__):
             for k in range(0, db.__tamano_compartimento__):
                 indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
-                if indiv == -1:
-                    puerto = -1
+                if indiv >= db.__num_contenedores__:
+                    puerto = " "
                 else:
-                    puerto = db.__contenedores__[indiv][2]
-                out += str(puerto).rjust(4) + " "
+                    puerto = str(db.__contenedores__[indiv][2])
+                out += puerto.rjust(4) + " "
             out += "| "
         out += "\n"
     return out
@@ -123,11 +149,11 @@ def strBarcoPeligro(ind):
         for j in range(0, db.__compartimentos__):
             for k in range(0, db.__tamano_compartimento__):
                 indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
-                if indiv == -1:
-                    peligro = -1
+                if indiv >= db.__num_contenedores__:
+                    peligro = " "
                 else:
-                    peligro = db.__contenedores__[indiv][3]
-                out += str(peligro).rjust(4) + " "
+                    peligro = str(db.__contenedores__[indiv][3])
+                out += peligro.rjust(4) + " "
             out += "| "
         out += "\n"
     return out
