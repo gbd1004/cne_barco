@@ -19,7 +19,7 @@ def main():
 
     population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=10000, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=False, stats=stats)
 
     output(logbook, population, debug=True)
     
@@ -87,7 +87,7 @@ def strBarcoPesos(ind):
         for j in range(0, db.__compartimentos__):
             for k in range(0, db.__tamano_compartimento__):
                 indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
-                if indiv == -1:
+                if indiv >= db.__num_contenedores__:
                     peso = 0
                 else:
                     peso = db.__contenedores__[indiv][1]
@@ -105,7 +105,7 @@ def strBarcoPuerto(ind):
         for j in range(0, db.__compartimentos__):
             for k in range(0, db.__tamano_compartimento__):
                 indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
-                if indiv == -1:
+                if indiv >= db.__num_contenedores__:
                     puerto = -1
                 else:
                     puerto = db.__contenedores__[indiv][2]

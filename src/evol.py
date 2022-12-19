@@ -62,7 +62,7 @@ def evaluar(individuo):
                 contenedor = individuo[posicion]
                 superior = obtenerSuperior(i, posicion, individuo)
 
-                if contenedor == -1:
+                if contenedor >= db.__num_contenedores__:
                     vacios += 1
                     continue
 
@@ -77,7 +77,7 @@ def evaluar(individuo):
                 puerto = db.__contenedores__[contenedor][2]
 
                 puerto_superior = 0
-                if superior != -1:
+                if superior != -1 and superior < db.__num_contenedores__:
                     puerto_superior = db.__contenedores__[superior][2]
 
                 if puerto_superior <= puerto:
@@ -148,7 +148,7 @@ def obtenerPeso(columna):
     elementos = []
 
     for i in columna:
-        if i == -1:
+        if i >= db.__num_contenedores__:
             elementos.append((0, i))
         else:
             elementos.append((db.__contenedores__[i][1], i))
@@ -178,7 +178,7 @@ def crearIndividuo(ind, rows, cols, compartimentos):
     lista_contenedores = listaPorPeso()
 
     barco = ind([-1 for i in range(0, rows * cols * compartimentos)])
-
+    
     posiciones_validas = initPosicionesValidas(cols, compartimentos)
 
     while len(lista_contenedores) > 0:
@@ -204,7 +204,13 @@ def crearIndividuo(ind, rows, cols, compartimentos):
         else:
             posiciones_validas[compartimento].remove(posiciones_validas[compartimento][posicion_])
 
-        
+     
+    id_hueco = db.__num_contenedores__
+    for i in range(len(barco)):
+        if barco[i] == -1:
+            barco[i] = id_hueco
+            id_hueco += 1
+
 
     return barco
 
