@@ -107,7 +107,7 @@ def evaluar(ind):
 
 
     evaluacion_peligro =  evaluacion_peligro / db.__num_peligrosos__
-    eval_peligro += evaluacion_peligro
+    eval_peligro += evaluacion_peligro * 40
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__

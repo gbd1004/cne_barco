@@ -3,11 +3,12 @@ import src.csv as csv
 import src.evol as evol
 from deap import base, algorithms, tools, creator
 import matplotlib.pyplot as plt
+import os
 
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
-test = "boat_test01"
+test = "boat_test06"
 
 def main():
     toolbox = base.Toolbox()
@@ -17,44 +18,55 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    population = toolbox.population(n=20)
+    population = toolbox.population(n=100)
+    hof = tools.HallOfFame(100)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=1000, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats, halloffame=hof)
+    # population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=100, lambda_=20,
+    #                                         cxpb=0.7, mutpb=0.3, ngen=100, 
+    #                                         stats=stats, halloffame=hof)
 
-    output(logbook, population, True)
+    output(logbook, hof)
 
+def verBarco(debug, frente):
+    if os.path.exists(f"salida/{test}_out.csv"):
+        os.remove(f"salida/{test}_out.csv")
+    for sol in frente:
+        printBarco(sol)
+        if debug:
+            print(strBarco(sol))
+            print(strBarcoPesos(sol))
+            print(strBarcoPuerto(sol))
+            print(strBarcoPeligro(sol))
+            testVaido(sol)
 
-def output(logbook, population, debug=False):
-    print("La mejor solucion encontrada es: ")
-    sol = tools.selBest(population,1)[0]
-    # sol = tools.selNSGA2(population, 1)[0]
+        csv.write_csv(sol, test) 
 
-    printBarco(sol)
-    if debug:
-        print(strBarco(sol))
-        print(strBarcoPesos(sol))
-        print(strBarcoPuerto(sol))
-        print(strBarcoPeligro(sol))
-        testVaido(sol)
+def output(logbook, hof, debug=True):
+    frentes = tools.sortNondominated(hof, len(hof))
 
-    csv.write_csv(sol, test)
+    verBarco(debug, frentes[0])
 
     gen = logbook.select("gen")
     avgs = logbook.select("avg")
     maxs = logbook.select("max")
     mins = logbook.select("min")
 
-    # f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    frentes_x = []
+    frentes_y = []
+    mejor_x = []
+    mejor_y = []
 
-    # line1 = ax1.plot(gen, avgs, "r-", label="Average Fitness")
-    # line2 = ax2.plot(gen, maxs, "g-", label="Max Fitness")
-    # line3 = ax3.plot(gen, mins, "b-", label="Min Fitness")
-    # ax1.set_xlabel("Generation")
-    # ax1.set_ylabel("Fitness (AVG)", color="r")
-    # ax2.set_xlabel("Generation")
-    # ax2.set_ylabel("Fitness (MAX)", color="g")
-    # ax3.set_xlabel("Generation")
-    # ax3.set_ylabel("Fitness (MIN)", color="b")
+    for i, frente in enumerate(frentes):
+        for ind in frente:
+            if i == 0:
+                mejor_x.append(ind.fitness.values[0])
+                mejor_y.append(ind.fitness.values[1])
+            else:
+                frentes_x.append(ind.fitness.values[0])
+                frentes_y.append(ind.fitness.values[1])
+
+ 
     f, (ax1, ax2, ax3) = plt.subplots(1, 3)
 
     maxs_x = [i[0] for i in maxs]
@@ -64,7 +76,8 @@ def output(logbook, population, debug=False):
     mins_x = [i[0] for i in mins]
     mins_y = [i[1] for i in mins]
 
-    ax1.scatter(maxs_x, maxs_y, label="Average Fitness")
+    ax1.scatter(frentes_x, frentes_y, label="Average Fitness")
+    ax1.scatter(mejor_x, mejor_y, label="Average Fitness")
     ax1.set_xlabel("Puertos")
     ax1.set_ylabel("Peligrosidad")
 

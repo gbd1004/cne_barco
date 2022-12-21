@@ -21,7 +21,7 @@ def read_csv(path: str) -> None:
                 db.__num_peligrosos__ += 1
 
 def write_csv(ind, path):
-    with open(f"salida/{path}_out.csv", "w") as file:
+    with open(f"salida/{path}_out.csv", "a") as file:
         csvwriter = csv.writer(file)
         cabecera = [str(db.__compartimentos__), str(db.__num_contenedores__)]
 
@@ -30,6 +30,11 @@ def write_csv(ind, path):
         for i in range(0, db.__compartimentos__):
             row = []
             for j in range(0, db.__tamano_compartimento__ ** 2):
-                row.append(str(ind[i * (db.__tamano_compartimento__ ** 2) + j]))
+                indiv = ind[i * (db.__tamano_compartimento__ ** 2) + j]
+                if indiv >= db.__num_contenedores__:
+                    istr = "-1"
+                else:
+                    istr = str(ind[i * (db.__tamano_compartimento__ ** 2) + j])
+                row.append(istr)
 
             csvwriter.writerow(row)
