@@ -41,6 +41,34 @@ def mutar(individual, indpb):
 
     return individual
 
+def evaluarPeligro(ind, contenedor, posicion, i, j):
+    peligro_actual = obtenerValor(contenedor, 3)
+
+    if peligro_actual == 0:
+        return 0
+
+    superior = obtenerSuperior(i, posicion, ind)
+    peligro_superior = obtenerValor(superior, 3)
+    if peligro_superior == 1:
+        return 1
+
+    inferior = obtenerInferior(i, posicion, ind)
+    peligro_inferior = obtenerValor(inferior, 3)
+    if peligro_inferior == 1:
+        return 1
+
+    izquierdo = obtenerIzquierdo(j, i, posicion, ind)
+    peligro_izquierdo = obtenerValor(izquierdo, 3)
+    if peligro_izquierdo == 1:
+        return 1
+
+    derecho = obtenerDerecho(j, i, posicion, ind)
+    peligro_derecho = obtenerValor(derecho, 3)
+    if peligro_derecho == 1:
+        return 1
+
+    return 0
+
 def factible_peligro(individuo):
     compartimentos = db.__compartimentos__
     filas = db.__tamano_compartimento__
