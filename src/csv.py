@@ -10,13 +10,15 @@ def read_csv(path: str) -> None:
         db.__compartimentos__ = int(primera_linea[0])
         db.__num_contenedores__ = int(primera_linea[1])
         db.__contenedores__ = []
-
+        db.__num_peligrosos__ = 0
 
         contenedores_compartimento = db.__num_contenedores__ / db.__compartimentos__
         db.__tamano_compartimento__ = math.ceil(math.sqrt(contenedores_compartimento))
 
         for row in reader:
             db.__contenedores__.append([row[0], int(row[1]), int(row[2]), int(row[3])])
+            if int(row[3]) == 1:
+                db.__num_peligrosos__ += 1
 
 def write_csv(ind, path):
     with open(f"salida/{path}_out.csv", "w") as file:

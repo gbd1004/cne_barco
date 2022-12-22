@@ -9,13 +9,13 @@ def configurarPoblacion(toolbox):
     toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-    toolbox.decorate("evaluate", tools.DeltaPenalty())
 
 def configurarEvolucion(toolbox):
     toolbox.register("mate", cruzar)
     toolbox.register("mutate", mutar, indpb=0.2)
     toolbox.register("select", tools.selTournament, tournsize=4)
     toolbox.register("evaluate", evaluar)
+    toolbox.decorate("evaluate", tools.DeltaPenalty(factible_peligro, 0, distancia_peligro))
 
 def configuraEstadisticasEvolucion():
     stats = tools.Statistics(lambda ind: ind.fitness.values) 
@@ -52,9 +52,25 @@ def factible_peligro(individuo):
                 posicion = i * (filas * cols) + (j * cols) + k
                 contenedor = individuo[posicion]
 
-                if evaluarPeligro(contenedor, posicion, i, j):
+                if evaluarPeligro(individuo, contenedor, posicion, i, j):
                     return False
     return True
+
+def distancia_peligro(individuo):
+    compartimentos = db.__compartimentos__
+    filas = db.__tamano_compartimento__
+    cols = db.__tamano_compartimento__
+    veces_incumple = 0
+
+    for i in range(0,compartimentos):
+        for j in range(0,filas):
+            for k in range(0, cols):
+                posicion = i * (filas * cols) + (j * cols) + k
+                contenedor = individuo[posicion]
+
+                veces_incumple += evaluarPeligro(individuo, contenedor, posicion, i, j)
+                
+    return (veces_incumple / db.__num_peligrosos__) * 50
 
 def evaluar(individuo):
     compartimentos = db.__compartimentos__
