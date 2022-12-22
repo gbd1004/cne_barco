@@ -8,7 +8,7 @@ import os
 import matplotlib
 # matplotlib.use('TkAgg',force=True)
 
-def run(n, ngen, test, ruta):
+def run(n, ngen, test, ruta, cxpb, mutpb):
     toolbox = base.Toolbox()
     csv.read_csv(f'datos/{test}.csv')
 
@@ -21,7 +21,7 @@ def run(n, ngen, test, ruta):
 
     # population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats, halloffame=hof)
     population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
-                                            cxpb=0.5, mutpb=0.5, ngen=ngen, 
+                                            cxpb=cxpb, mutpb=mutpb, ngen=ngen, 
                                             stats=stats, halloffame=hof)
 
     output(logbook, hof, test, ruta, n)
@@ -176,5 +176,7 @@ def strBarcoPeligro(ind):
 
 if __name__ == "__main__":
     for test in ["boat_test01", "boat_test03", "boat_test06"]:
-        for i in [25, 50, 75, 100]:
-            run(i, 200, test, "images/n")
+        for n in [25, 50, 75, 100]:
+            run(n, 200, test, "images/n", 0.5, 0.2)
+        for n in [(0.1, 0.9), (0.5,0.5), (0.9, 0.1), (0.4, 0.3), (0.3, 0.4)]:
+            run(100, 200, test, "images/cxpbmutpb", n[0], n[1])
