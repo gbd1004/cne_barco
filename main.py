@@ -18,7 +18,7 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    n = 1000
+    n = 100
 
     population = toolbox.population(n)
     hof = tools.HallOfFame(n)
