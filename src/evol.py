@@ -41,34 +41,6 @@ def mutar(individual, indpb):
 
     return individual
 
-def evaluarPeligro(ind, contenedor, posicion, i, j):
-    peligro_actual = obtenerValor(contenedor, 3)
-
-    if peligro_actual == 0:
-        return 0
-
-    superior = obtenerSuperior(i, posicion, ind)
-    peligro_superior = obtenerValor(superior, 3)
-    if peligro_superior == 1:
-        return 1
-
-    inferior = obtenerInferior(i, posicion, ind)
-    peligro_inferior = obtenerValor(inferior, 3)
-    if peligro_inferior == 1:
-        return 1
-
-    izquierdo = obtenerIzquierdo(j, i, posicion, ind)
-    peligro_izquierdo = obtenerValor(izquierdo, 3)
-    if peligro_izquierdo == 1:
-        return 1
-
-    derecho = obtenerDerecho(j, i, posicion, ind)
-    peligro_derecho = obtenerValor(derecho, 3)
-    if peligro_derecho == 1:
-        return 1
-
-    return 0
-
 def factible_peligro(individuo):
     compartimentos = db.__compartimentos__
     filas = db.__tamano_compartimento__
@@ -77,6 +49,12 @@ def factible_peligro(individuo):
     for i in range(0,compartimentos):
         for j in range(0,filas):
             for k in range(0, cols):
+                posicion = i * (filas * cols) + (j * cols) + k
+                contenedor = individuo[posicion]
+
+                if evaluarPeligro(contenedor, posicion, i, j):
+                    return False
+    return True
 
 def evaluar(individuo):
     compartimentos = db.__compartimentos__
@@ -136,6 +114,88 @@ def evaluar(individuo):
     eval += np.exp(div * 5)
 
     return eval,
+
+def evaluarPeligro(ind, contenedor, posicion, i, j):
+    peligro_actual = obtenerValor(contenedor, 3)
+
+    if peligro_actual == 0:
+        return 0
+
+    superior = obtenerSuperior(i, posicion, ind)
+    peligro_superior = obtenerValor(superior, 3)
+    if peligro_superior == 1:
+        return 1
+
+    inferior = obtenerInferior(i, posicion, ind)
+    peligro_inferior = obtenerValor(inferior, 3)
+    if peligro_inferior == 1:
+        return 1
+
+    izquierdo = obtenerIzquierdo(j, i, posicion, ind)
+    peligro_izquierdo = obtenerValor(izquierdo, 3)
+    if peligro_izquierdo == 1:
+        return 1
+
+    derecho = obtenerDerecho(j, i, posicion, ind)
+    peligro_derecho = obtenerValor(derecho, 3)
+    if peligro_derecho == 1:
+        return 1
+
+    return 0
+
+def obetenerPosInferior(cont, posicion):
+    tamano = db.__tamano_compartimento__**2
+    primera_pos = cont * tamano
+
+    inferior = posicion - db.__tamano_compartimento__
+    if inferior < primera_pos:
+        return -1
+
+    return inferior
+
+def obtenerInferior(cont, posicion, individuo):
+    pos_inferior = obetenerPosInferior(cont, posicion)
+    if pos_inferior != -1:
+        inferior = individuo[pos_inferior]
+    else:
+        inferior = -1
+    return inferior
+
+def obetenerPosIzquierdo(fila, cont, posicion):
+    tamano = db.__tamano_compartimento__
+    primera_pos = cont * (tamano ** 2) + fila * tamano
+
+    izquierdo = posicion - 1
+    if izquierdo < primera_pos:
+        return -1
+
+    return izquierdo
+
+def obtenerIzquierdo(fila, cont, posicion, individuo):
+    pos_izquierdo = obetenerPosIzquierdo(fila, cont, posicion)
+    if pos_izquierdo != -1:
+        izquierdo = individuo[pos_izquierdo]
+    else:
+        izquierdo = -1
+    return izquierdo
+
+def obetenerPosDerecho(fila, cont, posicion):
+    tamano = db.__tamano_compartimento__
+    ultima_pos = cont * (tamano ** 2) + (fila + 1) * tamano
+
+    derecho = posicion + 1
+    if derecho >= ultima_pos:
+        return -1
+
+    return derecho
+
+def obtenerDerecho(fila, cont, posicion, individuo):
+    pos_derecho = obetenerPosDerecho(fila, cont, posicion)
+    if pos_derecho != -1:
+        derecho = individuo[pos_derecho]
+    else:
+        derecho = -1
+    return derecho
 
 def obtenerValor(pos, indice):
     val = 0
