@@ -43,7 +43,7 @@ def mutar(individual, indpb):
 
     return individual
 
-def evaluarPeligro(ind, contenedor, posicion, i, j):
+def tiene_adyacente(ind, contenedor, posicion, i, j):
     peligro_actual = obtenerValor(contenedor, 3)
 
     if peligro_actual == 0:
@@ -79,7 +79,6 @@ def evaluar(ind):
     peso_compartimentos = [0 for i in range(0, compartimentos)]
     
     evaluacion_puerto = 0
-    evaluacion_peso = 0
 
     evaluacion_peligro = db.__num_peligrosos__
     eval_puerto = 0
@@ -106,17 +105,15 @@ def evaluar(ind):
 
                 peso_compartimentos[i] += peso
 
-                evaluacion_peligro -= evaluarPeligro(ind, contenedor, posicion, i, j)
+                evaluacion_peligro -= tiene_adyacente(ind, contenedor, posicion, i, j)
 
 
-    evaluacion_peligro =  evaluacion_peligro / db.__num_peligrosos__
+    evaluacion_peligro = evaluacion_peligro / db.__num_peligrosos__
     eval_peligro += evaluacion_peligro * 40
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
     eval_puerto += evaluacion_puerto * 40
-
-    evaluacion_peso = evaluacion_peso / db.__num_contenedores__
 
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)

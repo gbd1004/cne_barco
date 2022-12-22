@@ -23,7 +23,7 @@ def main():
     population = toolbox.population(n)
     hof = tools.HallOfFame(n)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats, halloffame=hof)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats, halloffame=hof)
     # population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
     #                                         cxpb=0.5, mutpb=0.5, ngen=100, 
     #                                         stats=stats, halloffame=hof)
@@ -80,16 +80,20 @@ def output(logbook, hof, debug=True):
 
     ax1.scatter(frentes_x, frentes_y, label="Average Fitness")
     ax1.scatter(mejor_x, mejor_y, label="Average Fitness")
-    ax1.set_xlabel("Puertos")
+    ax1.set_xlabel("Peso y puertos")
     ax1.set_ylabel("Peligrosidad")
 
     ax2.plot(gen, avgs_x, "r-", label="Average Fitness")
     ax2.plot(gen, maxs_x, "g-", label="Max Fitness")
     ax2.plot(gen, mins_x, "b-", label="Min Fitness")
+    ax2.set_xlabel("Peso y puertos")
+    ax2.set_ylabel("Generación")
 
     ax3.plot(gen, avgs_y, "r-", label="Average Fitness")
     ax3.plot(gen, maxs_y, "g-", label="Max Fitness")
     ax3.plot(gen, mins_y, "b-", label="Min Fitness")
+    ax3.set_xlabel("Peligrosidad")
+    ax3.set_ylabel("Generación")
 
     plt.show()
 
