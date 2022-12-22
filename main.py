@@ -5,7 +5,7 @@ from deap import base, algorithms, tools
 import matplotlib.pyplot as plt
 
 import matplotlib
-matplotlib.use('TkAgg',force=True)
+# matplotlib.use('TkAgg',force=True)
 
 def run(n, ngen, test):
     toolbox = base.Toolbox()
@@ -19,14 +19,15 @@ def run(n, ngen, test):
 
     population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=ngen, verbose=False, stats=stats)
 
-    output(logbook, population, debug=True)
+    output(logbook, population, n, test, debug=True)
     
     
-def output(logbook, population, debug=False):
+def output(logbook, population, n, test, debug=False):
     print("La mejor solucion encontrada es: ")
     sol = tools.selBest(population,1)[0]
     
-    printBarco(sol)
+    print(sol.fitness.values)
+    # printBarco(sol)
     if debug:
         print(strBarco(sol))
         print(strBarcoPesos(sol))
@@ -53,7 +54,8 @@ def output(logbook, population, debug=False):
 
     plt.legend(loc="upper left")
 
-    plt.show()
+    plt.savefig(f"images/{test}_{n}.png", dpi=f.dpi)
+    # plt.show()
 
 def printBarco(ind):
     print(str(db.__compartimentos__) + "," + str(db.__num_contenedores__))
@@ -148,5 +150,5 @@ def testVaido(ind):
 if __name__ == "__main__":
     for test in ["boat_test01", "boat_test03", "boat_test06"]:
         for i in [50, 75, 100, 125, 150]:
-            run(i, 100)
+            run(i, 100, test)
 
