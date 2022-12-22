@@ -18,7 +18,7 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    n = 100
+    n = 10
 
     population = toolbox.population(n)
     hof = tools.HallOfFame(n)
@@ -86,14 +86,16 @@ def output(logbook, hof, debug=True):
     ax2.plot(gen, avgs_x, "r-", label="Average Fitness")
     ax2.plot(gen, maxs_x, "g-", label="Max Fitness")
     ax2.plot(gen, mins_x, "b-", label="Min Fitness")
-    ax2.set_xlabel("Peso y puertos")
-    ax2.set_ylabel("Generación")
+    ax2.set_ylabel("Peso y puertos")
+    ax2.set_xlabel("Generación")
+    ax2.legend(loc="upper left")
 
     ax3.plot(gen, avgs_y, "r-", label="Average Fitness")
     ax3.plot(gen, maxs_y, "g-", label="Max Fitness")
     ax3.plot(gen, mins_y, "b-", label="Min Fitness")
-    ax3.set_xlabel("Peligrosidad")
-    ax3.set_ylabel("Generación")
+    ax3.set_ylabel("Peligrosidad")
+    ax3.set_xlabel("Generación")
+    ax3.legend(loc="upper left")
 
     plt.show()
 
