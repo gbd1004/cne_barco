@@ -17,9 +17,9 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    population = toolbox.population(n=200)
+    population = toolbox.population(n=20)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats)
 
     output(logbook, population, debug=True)
     
@@ -49,11 +49,11 @@ def output(logbook, population, debug=False):
     line2 = ax1.plot(gen, maxs, "g-", label="Max Fitness")
     line3 = ax1.plot(gen, mins, "b-", label="Min Fitness")
     ax1.set_xlabel("Generation")
-    ax1.set_ylabel("Fitness (AVG)", color="r")
+    ax1.set_ylabel("Fitness")
     ax1.set_xlabel("Generation")
-    ax1.set_ylabel("Fitness (MAX)", color="g")
     ax1.set_xlabel("Generation")
-    ax1.set_ylabel("Fitness (MIN)", color="b")
+
+    plt.legend(loc="upper left")
 
     plt.show()
 
