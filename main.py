@@ -6,11 +6,9 @@ import matplotlib.pyplot as plt
 import os
 
 import matplotlib
-matplotlib.use('TkAgg',force=True)
+# matplotlib.use('TkAgg',force=True)
 
-test = "boat_test06"
-
-def main():
+def run(n, ngen, test):
     toolbox = base.Toolbox()
     csv.read_csv(f'datos/{test}.csv')
 
@@ -18,19 +16,17 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    n = 10
-
     population = toolbox.population(n)
     hof = tools.HallOfFame(n)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats, halloffame=hof)
-    # population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
-    #                                         cxpb=0.5, mutpb=0.5, ngen=100, 
-    #                                         stats=stats, halloffame=hof)
+    # population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats, halloffame=hof)
+    population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
+                                            cxpb=0.5, mutpb=0.5, ngen=ngen, 
+                                            stats=stats, halloffame=hof)
 
-    output(logbook, hof)
+    output(logbook, hof, test, n)
 
-def verBarco(debug, frente):
+def verBarco(debug, frente, test):
     if os.path.exists(f"salida/{test}_out.csv"):
         os.remove(f"salida/{test}_out.csv")
     for sol in frente:
@@ -40,14 +36,13 @@ def verBarco(debug, frente):
             print(strBarcoPesos(sol))
             print(strBarcoPuerto(sol))
             print(strBarcoPeligro(sol))
-            testVaido(sol)
 
         csv.write_csv(sol, test) 
 
-def output(logbook, hof, debug=True):
+def output(logbook, hof, test, n, debug=False):
     frentes = tools.sortNondominated(hof, len(hof))
 
-    verBarco(debug, frentes[0])
+    verBarco(debug, frentes[0], test)
 
     gen = logbook.select("gen")
     avgs = logbook.select("avg")
@@ -68,8 +63,7 @@ def output(logbook, hof, debug=True):
                 frentes_x.append(ind.fitness.values[0])
                 frentes_y.append(ind.fitness.values[1])
 
- 
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 20))
 
     maxs_x = [i[0] for i in maxs]
     maxs_y = [i[1] for i in maxs]
@@ -88,15 +82,16 @@ def output(logbook, hof, debug=True):
     ax2.plot(gen, mins_x, "b-", label="Min Fitness")
     ax2.set_ylabel("Peso y puertos")
     ax2.set_xlabel("Generación")
-    ax2.legend(loc="upper left")
+    ax2.legend(loc="lower right")
 
     ax3.plot(gen, avgs_y, "r-", label="Average Fitness")
     ax3.plot(gen, maxs_y, "g-", label="Max Fitness")
     ax3.plot(gen, mins_y, "b-", label="Min Fitness")
     ax3.set_ylabel("Peligrosidad")
     ax3.set_xlabel("Generación")
-    ax3.legend(loc="upper left")
+    ax3.legend(loc="lower right")
 
+    plt.savefig(f"images/{test}_{n}.png", dpi=f.dpi)
     plt.show()
 
 def printBarco(ind):
@@ -179,17 +174,7 @@ def strBarcoPeligro(ind):
         out += "\n"
     return out
 
-def testVaido(ind):
-    seen = set()
-    for num in ind:
-        if num in seen:
-            if num != -1:
-                print("INVALIDO")
-                print(num)
-                return
-        seen.add(num)
-    print("Valido")
-
 if __name__ == "__main__":
-    main()
-
+    for test in ["boat_test01", "boat_test03", "boat_test06"]:
+        for i in [50, 75, 100, 125, 150]:
+            run(i, 100)
