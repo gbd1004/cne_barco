@@ -8,7 +8,7 @@ import os
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
-test = "boat_test01"
+test = "boat_test06"
 
 def main():
     toolbox = base.Toolbox()
