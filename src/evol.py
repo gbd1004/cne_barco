@@ -28,8 +28,8 @@ def configuraEstadisticasEvolucion():
 def cruzar(ind1, ind2):
     ind1, ind2 = tools.cxPartialyMatched(ind1, ind2)
 
-    # corregir(ind1)
-    # corregir(ind2)
+    corregir(ind1)
+    corregir(ind2)
 
     return ind1, ind2
 
