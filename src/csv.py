@@ -38,3 +38,4 @@ def write_csv(ind, path):
                 row.append(istr)
 
             csvwriter.writerow(row)
+        csvwriter.writerow([])

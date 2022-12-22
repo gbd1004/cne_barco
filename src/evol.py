@@ -30,15 +30,15 @@ def configuraEstadisticasEvolucion():
 def cruzar(ind1, ind2):
     ind1, ind2 = tools.cxPartialyMatched(ind1, ind2)
 
-    corregirPesos(ind1)
-    corregirPesos(ind2)
+    # corregirPesos(ind1)
+    # corregirPesos(ind2)
 
     return ind1, ind2
 
 def mutar(individual, indpb):
     individual = tools.mutShuffleIndexes(individual, indpb)
 
-    corregirPesos(individual[0])
+    # corregirPesos(individual[0])
 
     return individual
 
@@ -78,6 +78,8 @@ def evaluar(ind):
     peso_compartimentos = [0 for i in range(0, compartimentos)]
     
     evaluacion_puerto = 0
+    evaluacion_peso = 0
+
     evaluacion_peligro = db.__num_peligrosos__
     eval_puerto = 0
     eval_peligro = 0
@@ -91,15 +93,22 @@ def evaluar(ind):
                 superior = obtenerSuperior(i, posicion, ind)
 
                 if contenedor >= db.__num_contenedores__:
+                    if superior != -1 and superior < db.__num_contenedores__:
+                        eval_peligro -= 1000
+                        eval_puerto -= 1000
                     continue
 
                 peso = obtenerValor(contenedor, 1)
                 puerto = obtenerValor(contenedor, 2)
 
                 puerto_superior = obtenerValor(superior, 2)
+                peso_superior = obtenerValor(superior, 1)
 
                 if puerto_superior <= puerto:
                     evaluacion_puerto += 1
+
+                if peso_superior <= peso:
+                    evaluacion_peso += 1
 
                 peso_compartimentos[i] += peso
 
@@ -113,11 +122,17 @@ def evaluar(ind):
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
     eval_puerto += evaluacion_puerto * 40
 
+    evaluacion_peso = evaluacion_peso / db.__num_contenedores__
+
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)
     div = min_peso / max_peso
-    # eval_peligro += np.exp(div * 5)
-    eval_puerto += np.exp(div * 5)
+    eval_distribucion = np.exp(div * 5)
+
+    eval_puerto += eval_distribucion
+    eval_puerto += (1 - evaluacion_peso) * 100
+
+    # eval_peligro += eval_distribucion
 
     return eval_puerto, eval_peligro
 

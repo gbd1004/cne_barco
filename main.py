@@ -8,7 +8,7 @@ import os
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
-test = "boat_test06"
+test = "boat_test01"
 
 def main():
     toolbox = base.Toolbox()
@@ -18,13 +18,15 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    population = toolbox.population(n=100)
-    hof = tools.HallOfFame(100)
+    n = 1000
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats, halloffame=hof)
-    # population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=100, lambda_=20,
-    #                                         cxpb=0.7, mutpb=0.3, ngen=100, 
-    #                                         stats=stats, halloffame=hof)
+    population = toolbox.population(n)
+    hof = tools.HallOfFame(n)
+
+    # population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats, halloffame=hof)
+    population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
+                                            cxpb=0.5, mutpb=0.5, ngen=100, 
+                                            stats=stats, halloffame=hof)
 
     output(logbook, hof)
 
