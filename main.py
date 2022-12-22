@@ -8,7 +8,7 @@ import os
 import matplotlib
 # matplotlib.use('TkAgg',force=True)
 
-def run(n, ngen, test):
+def run(n, ngen, test, ruta):
     toolbox = base.Toolbox()
     csv.read_csv(f'datos/{test}.csv')
 
@@ -24,7 +24,7 @@ def run(n, ngen, test):
                                             cxpb=0.5, mutpb=0.5, ngen=ngen, 
                                             stats=stats, halloffame=hof)
 
-    output(logbook, hof, test, n)
+    output(logbook, hof, test, ruta, n)
 
 def verBarco(debug, frente, test):
     if os.path.exists(f"salida/{test}_out.csv"):
@@ -39,7 +39,7 @@ def verBarco(debug, frente, test):
 
         csv.write_csv(sol, test) 
 
-def output(logbook, hof, test, n, debug=False):
+def output(logbook, hof, test, ruta, n, debug=False):
     frentes = tools.sortNondominated(hof, len(hof))
 
     verBarco(debug, frentes[0], test)
@@ -91,7 +91,7 @@ def output(logbook, hof, test, n, debug=False):
     ax3.set_xlabel("Generación")
     ax3.legend(loc="lower right")
 
-    plt.savefig(f"images/{test}_{n}.png", dpi=f.dpi)
+    plt.savefig(f"{ruta}/{test}_{n}.png", dpi=f.dpi)
     plt.show()
 
 def printBarco(ind):
@@ -176,5 +176,5 @@ def strBarcoPeligro(ind):
 
 if __name__ == "__main__":
     for test in ["boat_test01", "boat_test03", "boat_test06"]:
-        for i in [50, 75, 100, 125, 150]:
-            run(i, 100)
+        for i in [25, 50, 75, 100]:
+            run(i, 200, test, "images/n")
