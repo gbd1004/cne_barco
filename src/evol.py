@@ -77,13 +77,9 @@ def evaluar(individuo):
     filas = db.__tamano_compartimento__
     cols = db.__tamano_compartimento__
 
-    num_vacios = compartimentos * filas ** 2 - db.__num_contenedores__
-    vacios = 0
-
     eval = 0
     evaluacion_puerto = 0
 
-    contenedores = {}
     peso_compartimentos = [0 for i in range(0, compartimentos)]
 
     for i in range(0,compartimentos):
@@ -95,15 +91,7 @@ def evaluar(individuo):
                 superior = obtenerSuperior(i, posicion, individuo)
 
                 if contenedor >= db.__num_contenedores__:
-                    vacios += 1
                     continue
-
-                existe = contenedores.get(contenedor)
-                # No valido
-                if existe != None:
-                    return -1,
-                
-                contenedores[contenedor] = 1
 
                 peso = obtenerValor(contenedor, 1)
                 puerto = obtenerValor(contenedor, 2)
@@ -114,11 +102,6 @@ def evaluar(individuo):
                     evaluacion_puerto += 1
 
                 peso_compartimentos[i] += peso
-
-
-    # No valido
-    if vacios != num_vacios:
-        return -1,
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__

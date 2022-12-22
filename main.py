@@ -19,7 +19,7 @@ def main():
 
     population = toolbox.population(n=200)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=1000, verbose=True, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats)
 
     output(logbook, population, debug=True)
     
