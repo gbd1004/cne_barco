@@ -9,6 +9,7 @@ def configurarPoblacion(toolbox):
     toolbox.register("individual", crearIndividuo, creator.Individual, rows=db.__tamano_compartimento__,
                      cols=db.__tamano_compartimento__, compartimentos=db.__compartimentos__)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    toolbox.decorate("evaluate", tools.DeltaPenalty())
 
 def configurarEvolucion(toolbox):
     toolbox.register("mate", cruzar)
@@ -40,6 +41,15 @@ def mutar(individual, indpb):
 
     return individual
 
+def factible_peligro(individuo):
+    compartimentos = db.__compartimentos__
+    filas = db.__tamano_compartimento__
+    cols = db.__tamano_compartimento__
+
+    for i in range(0,compartimentos):
+        for j in range(0,filas):
+            for k in range(0, cols):
+
 def evaluar(individuo):
     compartimentos = db.__compartimentos__
     filas = db.__tamano_compartimento__
@@ -50,8 +60,6 @@ def evaluar(individuo):
 
     eval = 0
     evaluacion_puerto = 0
-
-    invalidos = 0
 
     contenedores = {}
     peso_compartimentos = [0 for i in range(0, compartimentos)]
@@ -75,12 +83,10 @@ def evaluar(individuo):
                 
                 contenedores[contenedor] = 1
 
-                peso = db.__contenedores__[contenedor][1]
-                puerto = db.__contenedores__[contenedor][2]
+                peso = obtenerValor(contenedor, 1)
+                puerto = obtenerValor(contenedor, 2)
 
-                puerto_superior = 0
-                if superior != -1 and superior < db.__num_contenedores__:
-                    puerto_superior = db.__contenedores__[superior][2]
+                puerto_superior = obtenerValor(superior, 2)
 
                 if puerto_superior <= puerto:
                     evaluacion_puerto += 1
@@ -94,15 +100,21 @@ def evaluar(individuo):
 
     # Sumar recompensas
     evaluacion_puerto = evaluacion_puerto / db.__num_contenedores__
-    eval += evaluacion_puerto * 30
+    eval += evaluacion_puerto * 40
 
     max_peso = max(peso_compartimentos)
     min_peso = min(peso_compartimentos)
     div = min_peso / max_peso
     eval += np.exp(div * 5)
-    eval -= invalidos * 5
 
     return eval,
+
+def obtenerValor(pos, indice):
+    val = 0
+    if pos != -1 and pos < db.__num_contenedores__:
+        val = db.__contenedores__[pos][indice]
+
+    return val
 
 
 def strBarco(ind):
