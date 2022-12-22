@@ -33,6 +33,7 @@ def output(logbook, population, debug=False):
         print(strBarco(sol))
         print(strBarcoPesos(sol))
         print(strBarcoPuerto(sol))
+        print(strBarcoPeligro(sol))
         testVaido(sol)
 
     csv.write_csv(sol, test)
@@ -74,7 +75,11 @@ def strBarco(ind):
         out += "| "
         for j in range(0, db.__compartimentos__):
             for k in range(0, db.__tamano_compartimento__):
-                out += str(ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]).rjust(4) + " "
+                indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
+                if indiv >= db.__num_contenedores__:
+                    out += " ".rjust(4) + " "
+                else:
+                    out += str(indiv).rjust(4) + " "
             out += "| "
         out += "\n"
     return out
@@ -89,10 +94,12 @@ def strBarcoPesos(ind):
                 indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
                 if indiv >= db.__num_contenedores__:
                     peso = 0
+                    pesostr = " "
                 else:
                     peso = db.__contenedores__[indiv][1]
+                    pesostr = str(db.__contenedores__[indiv][1])
+                out += pesostr.rjust(4) + " "
                 pesos[j] += peso
-                out += str(peso).rjust(4) + " "
             out += "| "
         out += "\n"
     print(pesos)
@@ -106,10 +113,26 @@ def strBarcoPuerto(ind):
             for k in range(0, db.__tamano_compartimento__):
                 indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
                 if indiv >= db.__num_contenedores__:
-                    puerto = -1
+                    puerto = " "
                 else:
-                    puerto = db.__contenedores__[indiv][2]
-                out += str(puerto).rjust(4) + " "
+                    puerto = str(db.__contenedores__[indiv][2])
+                out += puerto.rjust(4) + " "
+            out += "| "
+        out += "\n"
+    return out
+
+def strBarcoPeligro(ind):
+    out = ""
+    for i in range(db.__tamano_compartimento__ - 1, -1, -1):
+        out += "| "
+        for j in range(0, db.__compartimentos__):
+            for k in range(0, db.__tamano_compartimento__):
+                indiv = ind[j * (db.__tamano_compartimento__ ** 2) + (i * db.__tamano_compartimento__) + k]
+                if indiv >= db.__num_contenedores__:
+                    peligro = " "
+                else:
+                    peligro = str(db.__contenedores__[indiv][3])
+                out += peligro.rjust(4) + " "
             out += "| "
         out += "\n"
     return out
