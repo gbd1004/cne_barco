@@ -7,9 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg',force=True)
 
-test = "boat_test01"
-
-def main():
+def run(n, ngen, test):
     toolbox = base.Toolbox()
     csv.read_csv(f'datos/{test}.csv')
 
@@ -17,9 +15,9 @@ def main():
     evol.configurarEvolucion(toolbox)
     stats = evol.configuraEstadisticasEvolucion()
 
-    population = toolbox.population(n=20)
+    population = toolbox.population(n)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=ngen, verbose=False, stats=stats)
 
     output(logbook, population, debug=True)
     
@@ -148,5 +146,7 @@ def testVaido(ind):
     print("Valido")
 
 if __name__ == "__main__":
-    main()
+    for test in ["boat_test01", "boat_test03", "boat_test06"]:
+        for i in [50, 75, 100, 125, 150]:
+            run(i, 100)
 
