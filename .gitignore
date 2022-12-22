@@ -1,5 +1,5 @@
-images/*
+images/
 
-salida/*
+salida/
 
-__pycache__/*
+__pycache__/

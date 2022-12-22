@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 # matplotlib.use('TkAgg',force=True)
 
-def run(n, ngen, test):
+def run(n, ngen, test, ruta, cxpb, mutpb):
     toolbox = base.Toolbox()
     csv.read_csv(f'datos/{test}.csv')
 
@@ -17,12 +17,12 @@ def run(n, ngen, test):
 
     population = toolbox.population(n)
 
-    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=ngen, verbose=False, stats=stats)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=cxpb, mutpb=mutpb, ngen=ngen, verbose=False, stats=stats)
 
-    output(logbook, population, n, test, debug=True)
+    output(logbook, population, n, test, ruta, cxpb, mutpb, debug=False)
     
     
-def output(logbook, population, n, test, debug=False):
+def output(logbook, population, n, test, ruta, cxpb, mutpb, debug=False):
     print("La mejor solucion encontrada es: ")
     sol = tools.selBest(population,1)[0]
     
@@ -33,7 +33,6 @@ def output(logbook, population, n, test, debug=False):
         print(strBarcoPesos(sol))
         print(strBarcoPuerto(sol))
         print(strBarcoPeligro(sol))
-        testVaido(sol)
 
     csv.write_csv(sol, test)
 
@@ -54,8 +53,9 @@ def output(logbook, population, n, test, debug=False):
 
     plt.legend(loc="upper left")
 
-    plt.savefig(f"images/{test}_{n}.png", dpi=f.dpi)
+    plt.savefig(f"{ruta}/{test}_n{n}_cxpb{cxpb}_mutpb{mutpb}.png", dpi=f.dpi)
     # plt.show()
+    plt.close()
 
 def printBarco(ind):
     print(str(db.__compartimentos__) + "," + str(db.__num_contenedores__))
@@ -137,18 +137,10 @@ def strBarcoPeligro(ind):
         out += "\n"
     return out
 
-def testVaido(ind):
-    seen = set()
-    for num in ind:
-        if num in seen:
-            if num != -1:
-                print("INVALIDO")
-                return
-        seen.add(num)
-    print("Valido")
-
 if __name__ == "__main__":
     for test in ["boat_test01", "boat_test03", "boat_test06"]:
-        for i in [50, 75, 100, 125, 150]:
-            run(i, 100, test)
+        for n in [25, 50, 75, 100]:
+            run(n, 200, test, "images/n", 0.5, 0.2)
+        for n in [(0.1, 0.9), (0.5,0.5), (0.9, 0.1), (0.4, 0.3), (0.3, 0.4)]:
+            run(100, 200, test, "images/cxpbmutpb", n[0], n[1])
 
