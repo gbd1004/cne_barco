@@ -23,10 +23,10 @@ def main():
     population = toolbox.population(n)
     hof = tools.HallOfFame(n)
 
-    # population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats, halloffame=hof)
-    population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
-                                            cxpb=0.5, mutpb=0.5, ngen=100, 
-                                            stats=stats, halloffame=hof)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=500, verbose=True, stats=stats, halloffame=hof)
+    # population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
+    #                                         cxpb=0.5, mutpb=0.5, ngen=100, 
+    #                                         stats=stats, halloffame=hof)
 
     output(logbook, hof)
 

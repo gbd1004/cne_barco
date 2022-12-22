@@ -100,7 +100,6 @@ def evaluar(ind):
                 puerto = obtenerValor(contenedor, 2)
 
                 puerto_superior = obtenerValor(superior, 2)
-                peso_superior = obtenerValor(superior, 1)
 
                 if puerto_superior <= puerto:
                     evaluacion_puerto += 1
