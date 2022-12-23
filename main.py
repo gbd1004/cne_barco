@@ -19,18 +19,18 @@ def run(n, ngen, test, ruta, cxpb, mutpb):
     population = toolbox.population(n)
     hof = tools.HallOfFame(n)
 
-    # population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats, halloffame=hof)
-    population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
-                                            cxpb=cxpb, mutpb=mutpb, ngen=ngen, 
-                                            stats=stats, halloffame=hof)
+    population, logbook = algorithms.eaSimple(population, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, verbose=True, stats=stats, halloffame=hof)
+    # population, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=n, lambda_=n * 2,
+    #                                         cxpb=cxpb, mutpb=mutpb, ngen=ngen, 
+    #                                         stats=stats, halloffame=hof, verbose=False)
 
-    output(logbook, hof, test, ruta, n)
+    output(logbook, hof, test, ruta, n, cxpb, mutpb)
 
 def verBarco(debug, frente, test):
     if os.path.exists(f"salida/{test}_out.csv"):
         os.remove(f"salida/{test}_out.csv")
     for sol in frente:
-        printBarco(sol)
+        # printBarco(sol)
         if debug:
             print(strBarco(sol))
             print(strBarcoPesos(sol))
@@ -39,7 +39,7 @@ def verBarco(debug, frente, test):
 
         csv.write_csv(sol, test) 
 
-def output(logbook, hof, test, ruta, n, debug=False):
+def output(logbook, hof, test, ruta, n, cxpb, mutpb, debug=False):
     frentes = tools.sortNondominated(hof, len(hof))
 
     verBarco(debug, frentes[0], test)
@@ -63,7 +63,7 @@ def output(logbook, hof, test, ruta, n, debug=False):
                 frentes_x.append(ind.fitness.values[0])
                 frentes_y.append(ind.fitness.values[1])
 
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 20))
+    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(30, 20))
 
     maxs_x = [i[0] for i in maxs]
     maxs_y = [i[1] for i in maxs]
@@ -91,8 +91,9 @@ def output(logbook, hof, test, ruta, n, debug=False):
     ax3.set_xlabel("Generación")
     ax3.legend(loc="lower right")
 
-    plt.savefig(f"{ruta}/{test}_{n}.png", dpi=f.dpi)
-    plt.show()
+    plt.savefig(f"{ruta}/{test}_n{n}_cxpb{cxpb}_mutpb{mutpb}_easimple.png", dpi=f.dpi)
+    # plt.show()
+    plt.close()
 
 def printBarco(ind):
     print(str(db.__compartimentos__) + "," + str(db.__num_contenedores__))
@@ -176,7 +177,5 @@ def strBarcoPeligro(ind):
 
 if __name__ == "__main__":
     for test in ["boat_test01", "boat_test03", "boat_test06"]:
-        for n in [25, 50, 75, 100]:
-            run(n, 200, test, "images/n", 0.5, 0.2)
-        for n in [(0.1, 0.9), (0.5,0.5), (0.9, 0.1), (0.4, 0.3), (0.3, 0.4)]:
-            run(100, 200, test, "images/cxpbmutpb", n[0], n[1])
+        run(100, 200, test, "images/easimple", 0.5, 0.2)
+        
